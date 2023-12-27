@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FirstAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FirstAPI.Data
 {
@@ -6,7 +7,8 @@ namespace FirstAPI.Data
     {
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
         {
-
         }
+
+        public DbSet<Produto> Produtos { get; set; }
     }
 }
