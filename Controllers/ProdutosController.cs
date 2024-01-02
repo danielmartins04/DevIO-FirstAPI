@@ -19,13 +19,17 @@ namespace FirstAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Produto>>> GetProdutos()
         {
+            if (_context.Produtos is null) return NotFound();
             return await _context.Produtos.ToListAsync();
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Produto>> GetProduto(int id)
         {
-            return await _context.Produtos.FindAsync(id);
+            if (_context.Produtos is null) return NotFound();
+            var produto = await _context.Produtos.FindAsync(id);
+            if (produto is null) return NotFound();
+            return produto;
         }
 
         [HttpPost]
@@ -50,18 +54,43 @@ namespace FirstAPI.Controllers
             if (id != produto.Id) return BadRequest();
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-            _context.Produtos.Update(produto);
-            await _context.SaveChangesAsync();
+            _context.Entry(produto).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            } catch (DbUpdateConcurrencyException)
+            {
+                if (!ProdutoExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
             return NoContent();
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProduto(int id)
         {
+            if (_context.Produtos is null) return NotFound();
+
             var produto = await _context.Produtos.FindAsync(id);
+
+            if (produto is null) return NotFound();
+
             _context.Produtos.Remove(produto);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        private bool ProdutoExists(int id)
+        {
+            return (_context.Produtos?.Any(p => p.Id == id)).GetValueOrDefault();
         }
     }
 }
