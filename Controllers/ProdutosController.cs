@@ -1,10 +1,12 @@
 ﻿using FirstAPI.Data;
 using FirstAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FirstAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/produtos")]
     public class ProdutosController : ControllerBase
