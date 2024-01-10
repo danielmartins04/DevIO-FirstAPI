@@ -3,7 +3,6 @@ using FirstAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -20,6 +19,21 @@ namespace FirstAPI
                 .ConfigureApiBehaviorOptions(options => {
                     options.SuppressModelStateInvalidFilter = true;
                 });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Development", builder =>
+                            builder
+                                .AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader());
+
+                options.AddPolicy("Production", builder =>
+                            builder
+                                .WithOrigins("https://localhost:9000")
+                                .WithMethods("POST")
+                                .AllowAnyHeader());
+            });
 
             builder.Services.AddEndpointsApiExplorer();
 
@@ -91,6 +105,11 @@ namespace FirstAPI
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseCors("Development");
+            }
+            else
+            {
+                app.UseCors("Production");
             }
 
             app.UseHttpsRedirection();
